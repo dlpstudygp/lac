@@ -8,15 +8,15 @@
  * 						
  */
 
-// Create mainapp class ...
-window.console.log("Create the LAC mainapp ... ");
+// Create mainlayout class ...
+window.console.log("Create the LAC mainlayout ... ");
 
 (function($,L)
 {	
 	L.LAYOUT.MainLayout = function(uuid)
 	{
 		// constructor ... 
-		window.console.log("LAC.LAYOUT.MainLayout __constuct(mainlayout:"+mainlayout+") ... ");
+		window.console.log("LAC.LAYOUT.MainLayout __constuct(uuid:"+uuid+") ... ");
 		
 		L.LAYOUT.Abstract.call(this,uuid); 
 		return this;
@@ -29,36 +29,54 @@ window.console.log("Create the LAC mainapp ... ");
 			// setup the layout here ... 
 			window.console.log("LAC.LAYOUT.MainLayout create(parent:"+parent+") ... ");
 			
-			this.components["navbar"] = this.createnavbar();
-			this.components["mainview"] = this.createmainview();
-			this.components["footer"] = this.createfooter();
+			this.components = 
+			{
+				"navbar" : {},
+				"mainview" : {},
+				"footer" : {},
+				"dialog" : {}
+			};
 			
-			parent.append(this.components["navbar"])
-				  .append(this.components["mainview"])
-				  .append(this.components["footer"]);
-				  
-			return this;
+			return this.createnavbar(this.components["navbar"],parent)
+					   .createmainview(this.components["mainview"],parent)
+					   .createfooter(this.components["footer"],parent)
+					   .createdialog(this.components["dialog"],parent)
+					   .eventlistener(this.components);
 		},
-		createnavbar : function()
+		createnavbar : function(components,parent)
 		{
 			// setup the navbar here ... 
-			window.console.log("LAC.LAYOUT.MainLayout createnavbar() ... ");
+			window.console.log("LAC.LAYOUT.MainLayout createnavbar(parent:"+parent+") ... ");
 			
-			return $("<navbar><navbar>");
+			return this;
 		},
-		createmainview : function()
+		createmainview : function(components,parent)
 		{
 			// setup the mainview here ... 
-			window.console.log("LAC.LAYOUT.MainLayout createmainview() ... ");
+			window.console.log("LAC.LAYOUT.MainLayout createmainview(parent:"+parent+") ... ");
 			
-			return $("<div></div>");
+			return this;
 		},
-		createfooter : function()
+		createfooter : function(components,parent)
 		{
 			// setup the footer here ... 
-			window.console.log("LAC.LAYOUT.MainLayout createfooter() ... ");
+			window.console.log("LAC.LAYOUT.MainLayout createfooter(parent:"+parent+") ... ");
 			
-			return $("<footer></footer>");
+			return this;
+		},
+		createdialog : function(components,parent)
+		{
+			// setup the dialog here ... 
+			window.console.log("LAC.LAYOUT.MainLayout createdialog(parent:"+parent+") ... ");
+			
+			return this;
+		},
+		eventlistener : function(components)
+		{
+			// setup the eventlistener here ... 
+			window.console.log("LAC.LAYOUT.MainLayout eventlistener(components:"+components+") ... ");
+			
+			return this;
 		},
 		toString : function()
 		{

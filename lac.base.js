@@ -36,13 +36,17 @@ jQuery.LAC =
 	},
 	CONNECTOR:
 	{
-		Package : function(uuid,flag,params)
+		Package : function(uuid,flag,params,reqinfo)
 		{
 			// The constructor of the CONNECTOR.Package
-			window.console.log("LAC.CONNECTOR.Package __construct(uuid:"+uuid+",flag:"+flag+",params:"+params+") ... ");			
+			window.console.log("LAC.CONNECTOR.Package __construct(uuid:"+uuid+",flag:"+flag+",params:"+params+",reqinfo:"+reqinfo+") ... ");			
 			
 			this.uuid = (typeof(uuid) === "string") ? uuid : (new Date()).valueOf(); // The identity of the package for the event listener ...
+			
 			this.reqinfo = {};														 // The all information required for the request ... 
+			if(reqinfo instanceof Object)
+				$.extend(this.reqinfo,reqinfo);	
+			
 			this.flag = flag;														 // Define the connection type ... 
 			this.result = (params instanceof Object) ? params : {};					 // The input params feed to the source, the return data will be appended here ...
 			this.msg = "";															 // The feedback from the source ...
@@ -52,10 +56,10 @@ jQuery.LAC =
 		Abstract : function(uuid)
 		{
 			// The abstract constructor of the CONNECTOR
-			window.console.log("LAC.CONNECTOR.Abstract __construct(uuid:"+uuid+",app:"+app+") ... ");			
+			window.console.log("LAC.CONNECTOR.Abstract __construct(uuid:"+uuid+") ... ");			
 
-			this.uuid = (new Date()).valueOf(); // The identity of the connector ...
-			this.app = null;					// The creator ... 
+			this.uuid = (typeof(uuid) === "string") ? uuid : (new Date()).valueOf(); // The identity of the connector ...
+			this.app = null;														 // The creator ... 
 			return this;
 		}
 	},
@@ -64,11 +68,11 @@ jQuery.LAC =
 		Abstract : function(uuid)
 		{
 			// The abstract constructor of the LAYOUT
-			window.console.log("LAC.LAYOUT.Abstract __construct(uuid:"+uuid+",app:"+app+",parent:"+parent+") ... ");			
+			window.console.log("LAC.LAYOUT.Abstract __construct(uuid:"+uuid+") ... ");			
 
-			this.uuid = (new Date()).valueOf(); // The identity of the layout ...			
-			this.app = null; 																				 // The app created by .. 
-			this.components = {};																			 // The storage of the layouts components ...
+			this.uuid = (typeof(uuid) === "string") ? uuid : (new Date()).valueOf(); // The identity of the layout ...			
+			this.app = null; 														 // The creator ... 						 // The app created by .. 
+			this.components = {};													 // The storage of the layouts components ...
 			
 			return this;
 		}
@@ -114,8 +118,8 @@ jQuery.LAC.APP.Abstract.prototype =
 		window.console.log("LAC.APP.Abstract updatealllayouts(flag:"+flag+",data:"+data+"caller:"+caller+") ... ");			
 			
 		for(var i in this.layouts)
-			if(layouts[i] != caller)
-				layouts[i].update(flag,data);
+			if(this.layouts[i] != caller)
+				this.layouts[i].update(flag,data);
 			
 		return this;
 	},
@@ -145,27 +149,25 @@ jQuery.LAC.CONNECTOR.Abstract.prototype =
 
 		return this;
 	},
-	request : function(uuid,flag,params,callback)
+	request : function(uuid,flag,params,reqinfo,callback)
 	{
 		// set event listener for the request ... 
-		window.console.log("LAC.CONNECTOR.Abstract request(uuid:"+uuid+",flag:"+flag+"params:"+params+"callback:"+callback+") ... ");
+		window.console.log("LAC.CONNECTOR.Abstract request(uuid:"+uuid+",flag:"+flag+",params:"+params+",reqinfo:"+reqinfo+",callback:"+callback+") ... ");
 
 		var self = this;
 		$(document).bind(this.uuid+flag,function(ev)
 		{
-			window.console.log("DVM/IO/FileSystem request/bind: " + ev.type + " ... ");
-			
 			var isunbind = true;
-			if(pack.iserror)
-				self.app.error(pack.msg);
+			if(ev.pack.iserror)
+				self.app.error(ev.pack.msg);
 			else if(typeof(callback) == "function")
 				isunbind = callback(ev.pack);
 			
 			if(isunbind)
-				$(document).unbind(self.uuid+flag);	
+				$(document).unbind(self.uuid+ev.pack.flag);	
 		});
 		
-		this.route(new $.LAC.CONNECTOR.Package(uuid,flag,params));
+		this.route(new $.LAC.CONNECTOR.Package(uuid,flag,params,reqinfo));
 		return this;
 	},
 	route : function(pack)
@@ -216,7 +218,7 @@ jQuery.LAC.LAYOUT.Abstract.prototype =
 		// route the receive flag ... 
 		window.console.log("LAC.LAYOUT.Abstract update(flag:"+flag+",data:"+data+") ... ");
 
-		if(flag == $.LAC.FLAG.ERROR)
+		if(flag == jQuery.LAC.FLAG.ERROR)
 			this.error(data);
 		
 		return this;
